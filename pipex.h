@@ -17,4 +17,5 @@
 #include <sys/wait.h>
 #include "Libft/libft.h"
 
-int	check_args(int argc, char **argv);
+void    parent_process(int f1, int p_fd[2]);
+void	child_process(int f2, int p_fd[2]);

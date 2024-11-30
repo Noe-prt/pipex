@@ -5,98 +5,57 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nopareti <nopareti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/27 11:06:34 by nopareti          #+#    #+#             */
-/*   Updated: 2024/11/27 11:06:34 by nopareti         ###   ########.fr       */
+/*   Created: 2024/11/29 12:25:33 by nopareti          #+#    #+#             */
+/*   Updated: 2024/11/29 12:25:33 by nopareti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-//   ./pipex infile "ls -l" "wc -l" outfile
-
 #include "pipex.h"
-
 
 int	main(int argc, char **argv)
 {
-	int	in_fd;
-	int	out_fd;
-	int	pipe_fd[2];
-	char *grep_args[] = {"grep", "awawawa", NULL};
-	char *wc_args[] = {"wc", "-l", NULL};
-	pid_t pid1;
-	pid_t pid2;
+	int	p_fd[2];
+	pid_t	pid;
+	int	f1;
+	int	f2;
 
-	if (!check_args(argc, argv))
+	if (argc != 5)
+		exit(0); // args error
+	if (pipe(p_fd) == -1)
+		exit(0); // pipe error
+	f1 = open(argv[1], O_RDONLY);
+	f2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (!f1 || !f2)
 	{
-		exit(EXIT_FAILURE);
+		perror("Fd Error");
+		exit(0);
 	}
-	if (pipe(pipe_fd) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
-	pid1 = fork();
-	if (pid1 == -1)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE);
-	}
-	if (pid1 == 0)
-    {
-        in_fd = open(argv[1], O_RDONLY);
-        if (in_fd == -1)
-        {
-            perror("Error: Can't open infile");
-            exit(EXIT_FAILURE);
-        }
-        dup2(in_fd, STDIN_FILENO);
-        close(in_fd);
-        dup2(pipe_fd[1], STDOUT_FILENO);
-        close(pipe_fd[0]);
-        close(pipe_fd[1]);
-        execve("/usr/bin/grep", grep_args, NULL);
-    }
-	pid2 = fork();
-	if (pid2 == 0)
-    {
-        dup2(pipe_fd[0], STDIN_FILENO);
-        close(pipe_fd[1]);
-        close(pipe_fd[0]);
-        out_fd = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (out_fd == -1)
-        {
-            perror("Error: Can't open outfile");
-            exit(EXIT_FAILURE);
-        }
-        dup2(out_fd, STDOUT_FILENO);
-        close(out_fd);
-        execve("/usr/bin/wc", wc_args, NULL);
-    }
-	close(pipe_fd[0]);
-    close(pipe_fd[1]);
-    waitpid(pid1, NULL, 0);
-    waitpid(pid2, NULL, 0);
-    exit(EXIT_SUCCESS);
+	pid = fork();
+	if (pid == -1)
+		exit(0); // fork error
+	if (!pid)
+		child_process(f1, p_fd);
+	parent_process(f2, p_fd);
 }
 
-int	check_args(int argc, char **argv)
+void	child_process(int f1, int p_fd[2])
 {
-	int	fd;
-	if (argc != 5)
-		return (0);
-	if (access(argv[1], R_OK) == -1)
-	{
-		perror("Error: Can't read infile");
-		return (0);
-	}
-	if (access(argv[4], W_OK) == -1)
-	{
-	 	fd = open(argv[4], O_WRONLY | O_CREAT, 0644);
-		if (fd == -1)
-		{
-			perror("Error: Can't write to outfile");
-			return (0);
-		}
-		close(fd);
-	}
-	return (1); // Tout est OK
+	char	*args[3] = {"ls", "-l", NULL};
+	dup2(f1, STDIN_FILENO);
+	dup2(p_fd[1], STDOUT_FILENO);
+	close(p_fd[0]);
+	close(f1);
+	execve("/bin/ls", args, NULL);
+	exit(1);
+}
+
+void parent_process(int f2, int p_fd[2])
+{
+	char	*args[3] = {"wc", "-l", NULL};
+	dup2(p_fd[0], STDIN_FILENO);
+	dup2(f2, STDOUT_FILENO);
+	close(p_fd[1]);
+	close(f2);
+	execve("/usr/bin/wc", args, NULL);
+	exit(1);
 }
