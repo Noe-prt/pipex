@@ -17,5 +17,6 @@
 #include <sys/wait.h>
 #include "Libft/libft.h"
 
-void    parent_process(int f1, int p_fd[2]);
-void	child_process(int f2, int p_fd[2]);
+void parent_process(int f2, char *cmd, int p_fd[2], char **envp);
+void	child_process(int f1, char* cmd, int p_fd[2], char **envp);
+int	exec_cmd(char *cmd, char **envp);
