@@ -1,6 +1,6 @@
 CC = cc
 
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror
 
 TARGET = pipex
 
@@ -12,8 +12,8 @@ all: $(LIBFT_LIB) $(TARGET)
 $(LIBFT_LIB):
 	$(MAKE) -C $(LIBFT_DIR)
 
-$(TARGET): main.c $(LIBFT_LIB)
-	$(CC) $(CFLAGS) -o $(TARGET) main.c -L$(LIBFT_DIR) -lft
+$(TARGET): pipex.c $(LIBFT_LIB)
+	$(CC) $(CFLAGS) -o $(TARGET) pipex.c -L$(LIBFT_DIR) -lft
 
 run: $(TARGET)
 	./$(TARGET)
