@@ -6,7 +6,7 @@
 /*   By: nopareti <nopareti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/27 12:09:47 by nopareti          #+#    #+#             */
-/*   Updated: 2024/11/27 12:09:47 by nopareti         ###   ########.fr       */
+/*   Updated: 2024/12/01 17:59:03 by nopareti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "utils.c"
 #include "Libft/libft.h"
 
 void	parent_process(int f2, char *cmd, int p_fd[2], char **envp);
-void	child_process(int f1, char* cmd, int p_fd[2], char **envp);
-void	free_double_str(char **double_str);
-int	exec_cmd(char *cmd, char **envp);
+void	child_process(int f1, char *cmd, int p_fd[2], char **envp);
+int		exec_cmd(char *cmd, char **envp);
+char	**get_splitted_path(char **envp);
+char	*get_cmd_path(char **envp, char *cmd_name);
+char	**get_cmd_args(char *cmd);

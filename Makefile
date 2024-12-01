@@ -12,8 +12,8 @@ all: $(LIBFT_LIB) $(TARGET)
 $(LIBFT_LIB):
 	$(MAKE) -C $(LIBFT_DIR)
 
-$(TARGET): pipex.c $(LIBFT_LIB)
-	$(CC) $(CFLAGS) -o $(TARGET) pipex.c -L$(LIBFT_DIR) -lft
+$(TARGET): pipex.c utils.c $(LIBFT_LIB)
+	$(CC) $(CFLAGS) -o $(TARGET) pipex.c utils.c -L$(LIBFT_DIR) -lft
 
 run: $(TARGET)
 	./$(TARGET)
