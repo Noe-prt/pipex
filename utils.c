@@ -1,24 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.h                                            :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nopareti <nopareti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/27 12:09:47 by nopareti          #+#    #+#             */
-/*   Updated: 2024/11/27 12:09:47 by nopareti         ###   ########.fr       */
+/*   Created: 2024/11/30 17:57:54 by nopareti          #+#    #+#             */
+/*   Updated: 2024/11/30 17:57:54 by nopareti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include "utils.c"
-#include "Libft/libft.h"
+void free_strs(char **strs)
+{
+    int i;
 
-void	parent_process(int f2, char *cmd, int p_fd[2], char **envp);
-void	child_process(int f1, char* cmd, int p_fd[2], char **envp);
-void	free_double_str(char **double_str);
-int	exec_cmd(char *cmd, char **envp);
+    i = 0;
+    while (strs[i])
+        free(strs[i++]);
+    free(strs);
+}

@@ -20,19 +20,16 @@ int	main(int argc, char **argv, char **envp)
 	int	f2;
 
 	if (argc != 5)
-		exit(0); // args error
+		exit(EXIT_FAILURE);
 	if (pipe(p_fd) == -1)
-		exit(0); // pipe error
+		exit(EXIT_FAILURE);
 	f1 = open(argv[1], O_RDONLY);
 	f2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (!f1 || !f2)
-	{
-		perror("Fd Error");
-		exit(0);
-	}
+		exit(EXIT_FAILURE);
 	pid = fork();
 	if (pid == -1)
-		exit(EXIT_FAILURE); // fork error
+		exit(EXIT_FAILURE);
 	if (!pid)
 		child_process(f1, argv[2], p_fd, envp);
 	parent_process(f2, argv[3], p_fd, envp);
@@ -45,63 +42,59 @@ void	child_process(int f1, char* cmd, int p_fd[2], char **envp)
 	close(p_fd[0]);
 	close(f1);
 	if (!exec_cmd(cmd, envp))
-	{
-		perror("Error");
 		exit(EXIT_FAILURE);
-	}
-	exit(1);
+	exit(EXIT_SUCCESS);
 }
 
 void parent_process(int f2, char *cmd, int p_fd[2], char **envp)
 {
+	int status;
+
+	waitpid(-1, &status, 0);
 	dup2(p_fd[0], STDIN_FILENO);
 	dup2(f2, STDOUT_FILENO);
 	close(p_fd[1]);
 	close(f2);
 	if (!exec_cmd(cmd, envp))
-	{
-		perror("Error");
 		exit(EXIT_FAILURE);
-	}
-	exit(1);
+	exit(EXIT_SUCCESS);
 }
 
-char *get_cmd_path(char **envp)
+char *get_cmd_path(char **envp, char *cmd_name)
 {
-	int	i;
-	char	slash[2];
-	char	**splitted_path;
-	char	*cmd_path;
-	char	*full_cmd;
+    int i;
+    char **splitted_path;
+    char *cmd_path;
+    char *full_cmd;
+    char slash[2];
 
-	
 	i = 0;
 	slash[0] = '/';
 	slash[1] = '\0';
-	while (ft_strncmp(envp[i], "PATH=", 5) != 0)
+    while (ft_strncmp(envp[i], "PATH=", 5) != 0)
         i++;
-	splitted_path = ft_split(envp[i] + 5, ':');
+    splitted_path = ft_split(envp[i] + 5, ':');
     if (!splitted_path)
 	{
-		free(splitted_path);
+		free_strs(splitted_path);
         return (NULL);
 	}
-	i = 0;
-	while (splitted_path[i])
+    while (splitted_path[i])
     {
-		cmd_path = ft_strjoin(splitted_path[i], slash);
-		full_cmd = ft_strjoin(cmd_path, cmd);
+        cmd_path = ft_strjoin(splitted_path[i], slash);
+        full_cmd = ft_strjoin(cmd_path, cmd_name);
         if (access(full_cmd, X_OK) == 0)
-		{
-			free(splitted_path);
+        {
+			free_strs(splitted_path);
 			free(cmd_path);
             return (full_cmd);
-		}
-        i++;
+        }
+		free(full_cmd);
+		free(cmd_path);
+		i++;
     }
-	free(splitted_path);
-	free(cmd_path);
-	return (NULL);
+	free_strs(splitted_path);
+    return (NULL);
 }
 
 char **get_cmd_args(char *cmd)
@@ -121,8 +114,8 @@ char **get_cmd_args(char *cmd)
 		args[i] = splitted_cmd[i];
 		i++;
 	}
+	free_strs(splitted_cmd);
 	args[i] = NULL;
-	free(splitted_cmd);
 	return (args);
 }
 
@@ -131,16 +124,14 @@ int exec_cmd(char *cmd, char **envp)
 	char	*cmd_path;
 	char	**cmd_args;
 
-	cmd_path = get_cmd_path(envp, cmd);
 	cmd_args = get_cmd_args(cmd);
+	cmd_path = get_cmd_path(envp, cmd_args[0]);
 	if (cmd_path && cmd_args)
 	{
 		execve(cmd_path, cmd_args, envp);
 		free(cmd_path);
-		free(cmd_args);
+		free_strs(cmd_args);
 		return (1);
 	}
-	free(cmd_path);
-	free(cmd_args);
 	return (0);
 }
