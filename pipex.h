@@ -22,4 +22,6 @@ void	child_process(int f1, char *cmd, int p_fd[2], char **envp);
 int		exec_cmd(char *cmd, char **envp);
 char	**get_splitted_path(char **envp);
 char	*get_cmd_path(char **envp, char *cmd_name);
+char	*set_full_cmd(char *current_path, char *cmd_name);
 char	**get_cmd_args(char *cmd);
+void	free_strs(char **strs);

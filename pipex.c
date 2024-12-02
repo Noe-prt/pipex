@@ -72,11 +72,16 @@ int	exec_cmd(char *cmd, char **envp)
 	char	**cmd_args;
 
 	cmd_args = get_cmd_args(cmd);
+	if (!cmd_args)
+		return (0);
 	cmd_path = get_cmd_path(envp, cmd_args[0]);
-	if (cmd_path && cmd_args)
+	if (cmd_path)
 	{
 		execve(cmd_path, cmd_args, envp);
+		free(cmd_path);
+		free(cmd_args);
 		return (1);
 	}
+	free_strs(cmd_args);
 	return (0);
 }
