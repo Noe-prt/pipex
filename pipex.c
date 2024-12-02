@@ -20,16 +20,19 @@ int	main(int argc, char **argv, char **envp)
 	pid_t	pid;
 
 	if (argc != 5)
-		exit(1);
+		exit(-1);
 	if (pipe(p_fd) == -1)
-		exit(1);
+		exit(-1);
 	f1 = open(argv[1], O_RDONLY);
 	f2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (!f1 || !f2)
-		exit(1);
+	if (f1 == -1)
+	{
+		perror("pipex: file error");
+		exit(-1);
+	}
 	pid = fork();
 	if (pid == -1)
-		exit(1);
+		exit(-1);
 	if (!pid)
 		child_process(f1, argv[2], p_fd, envp);
 	parent_process(f2, argv[3], p_fd, envp);
@@ -42,21 +45,24 @@ void	child_process(int f1, char *cmd, int p_fd[2], char **envp)
 	close(p_fd[0]);
 	close(f1);
 	if (!exec_cmd(cmd, envp))
-		exit(1);
+	{
+		perror("pipex: command error");
+		exit(-1);
+	}
 	exit(0);
 }
 
 void	parent_process(int f2, char *cmd, int p_fd[2], char **envp)
 {
-	int	status;
-
-	waitpid(-1, &status, 0);
 	dup2(p_fd[0], STDIN_FILENO);
 	dup2(f2, STDOUT_FILENO);
 	close(p_fd[1]);
 	close(f2);
 	if (!exec_cmd(cmd, envp))
-		exit(1);
+	{
+		perror("pipex: command error");
+		exit(-1);
+	}
 	exit(0);
 }
 
