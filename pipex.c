@@ -20,7 +20,10 @@ int	main(int argc, char **argv, char **envp)
 	pid_t	pid;
 
 	if (argc != 5)
+	{
+		ft_putstr_fd("pipex: format error: [file1] [cmd1] [cmd2] [file2]\n", 1);
 		exit(-1);
+	}
 	if (pipe(p_fd) == -1)
 		exit(-1);
 	f1 = open(argv[1], O_RDONLY);
