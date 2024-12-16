@@ -28,7 +28,7 @@ int	main(int argc, char **argv, char **envp)
 		exit(-1);
 	f1 = open(argv[1], O_RDONLY);
 	f2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (f1 == -1)
+	if (f1 == -1 || f2 == -1)
 	{
 		perror("pipex: file error");
 		exit(-1);
